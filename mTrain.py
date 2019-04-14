@@ -53,8 +53,6 @@ def getValue(data, pick):
     ans = temp[:tag2]
 
     return str(ans)
-
-
 def myInputTime():
     passFlag = False
     time = input('幾點後的車 : ')
@@ -104,42 +102,42 @@ def myGetDate():
         return d
     else:
         myGetDate()
-load = {
-    "FromCity": "0",
-    "FromStation": "1029",  # 1006 南港
-    "FromStationName": "0",
-    "ToCity": "0",
-    "ToStation": "1006",  # 1029 三坑 1001基隆
-    "ToStationName": "0",
-    "TrainClass": "2",
-    "searchdate": "2019-04-10",
-    "FromTimeSelect": "0820",
-    "ToTimeSelect": "2359",
-    "Timetype": "1"
-}
+def myTrain():
+    load = {
+        "FromCity": "0",
+        "FromStation": "1029",  # 1006 南港
+        "FromStationName": "0",
+        "ToCity": "0",
+        "ToStation": "1006",  # 1029 三坑 1001基隆
+        "ToStationName": "0",
+        "TrainClass": "2",
+        "searchdate": "2019-04-10",
+        "FromTimeSelect": "0820",
+        "ToTimeSelect": "2359",
+        "Timetype": "1"
+    }
+    try:
+        load.update(myGetDate())
+        load.update(myInputTime())
+        load.update(myInputStation())
+    except:
+        print("\n*********************")
+        load.update(myGetDate())
+        load.update(myInputTime())
+        load.update(myInputStation())
+    res=requests.get('http://twtraffic.tra.gov.tw/twrail/TW_SearchResult.aspx',data=load)
+    soup=BeautifulSoup(res.text,'html.parser')
+    sp1=soup.find_all(['script'])
+    mstring=str(sp1.pop())
+    p1=mstring.find('"Train_Code"')
+    p2=mstring.find('},')
+    first='{   '+mstring[p1:p2+1]
+    departureTime=getValue(first,'departure')
 
-try:
-    load.update(myGetDate())
-    load.update(myInputTime())
-    load.update(myInputStation())
-except:
-    print("\n*********************")
-    load.update(myGetDate())
-    load.update(myInputTime())
-    load.update(myInputStation())
-res=requests.get('http://twtraffic.tra.gov.tw/twrail/TW_SearchResult.aspx',data=load)
-soup=BeautifulSoup(res.text,'html.parser')
-sp1=soup.find_all(['script'])
-mstring=str(sp1.pop())
-p1=mstring.find('"Train_Code"')
-p2=mstring.find('},')
-first='{   '+mstring[p1:p2+1]
-departureTime=getValue(first,'departure')
-
-dt = datetime.combine(date.today(),time(int(departureTime[0:2]), int(departureTime[2:4]))) - timedelta(minutes=22)
-dt1 = dt+timedelta(minutes=17)
-print('\n鬧鐘時間: '+dt.time().strftime('%H%M'))
-print('出門時間: '+dt1.time().strftime('%H%M'))
-print("發車時間: "+departureTime)
-print("到達時間: "+(getValue(first,'arrival')))
+    dt = datetime.combine(date.today(),time(int(departureTime[0:2]), int(departureTime[2:4]))) - timedelta(minutes=22)
+    dt1 = dt+timedelta(minutes=17)
+    print('\n鬧鐘時間: '+dt.time().strftime('%H%M'))
+    print('出門時間: '+dt1.time().strftime('%H%M'))
+    print("發車時間: "+departureTime)
+    print("到達時間: "+(getValue(first,'arrival')))
 
